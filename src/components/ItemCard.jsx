@@ -3,13 +3,15 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 const Card = styled.div`
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
-  background-color: #fafafa;
-  cursor: pointer;
-  position: relative;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  transition: 0.2s ease-in-out;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  }
 `;
 
 const ItemName = styled.h3`
