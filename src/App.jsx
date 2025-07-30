@@ -13,6 +13,7 @@ const CategorySection = styled.div`
 const CategoryTitle = styled.h2`
   font-size: 1.2rem;
   margin: 0;
+  color: #000;
 `;
 
 const CategoryHeader = styled.div`
@@ -80,10 +81,11 @@ const AddButton = styled.button`
 `;
 
 export default function InventoryManager() {
+  const { items, updateInventory } = useInventory();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const { items, updateInventory } = useInventory();
   const [collapsed, setCollapsed] = useState({});
   const [filterCategory, setFilterCategory] = useState("All");
   const [sortOrder, setSortOrder] = useState("nameAsc");

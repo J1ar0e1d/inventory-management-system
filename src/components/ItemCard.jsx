@@ -3,15 +3,14 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 const Card = styled.div`
-  background: white;
+  border: 1px solid #ccc;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  padding: 1rem;
-  transition: 0.2s ease-in-out;
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-  }
+  padding: 16px;
+  margin-bottom: 16px;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  min-width: 300px;
+  max-width: 500px;
 `;
 
 const ItemName = styled.h3`
@@ -26,43 +25,86 @@ const ItemDetails = styled.p`
 `;
 
 const EditButton = styled.button`
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #0077ff;
-  color: white;
+  padding: 6px 12px;
   border: none;
-  padding: 6px 10px;
   border-radius: 6px;
+  background-color: #4caf50;
+  color: white;
   cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background-color: #45a049;
+  }
+`;
+
+const InfoRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const Label = styled.div`
+  font-weight: 600;
+  color: #444;
+`;
+
+const Value = styled.div`
+  color: #222;
+  max-width: 60%;
+  text-align: right;
+  word-break: break-word;
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  gap: 10px;
 `;
 
 export default function ItemCard({ item, onEdit }) {
   const [showEdit, setShowEdit] = useState(false);
 
   return (
-    <Card onClick={() => setShowEdit((prev) => !prev)}>
-      {showEdit && (
-        <EditButton
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(item);
-          }}
-        >
-          Edit
-        </EditButton>
-      )}
+    <Card>
+      <InfoRow>
+        <Label>Name:</Label>
+        <Value>{item.name}</Value>
+      </InfoRow>
+      <InfoRow>
+        <Label>Barcode:</Label>
+        <Value>{item.barcode}</Value>
+      </InfoRow>
+      <InfoRow>
+        <Label>Description:</Label>
+        <Value>{item.description}</Value>
+      </InfoRow>
+      <InfoRow>
+        <Label>Purchase Price:</Label>
+        <Value>${item.purchasePrice}</Value>
+      </InfoRow>
+      <InfoRow>
+        <Label>Sell Price:</Label>
+        <Value>${item.sellPrice}</Value>
+      </InfoRow>
+      <InfoRow>
+        <Label>Category:</Label>
+        <Value>{item.category}</Value>
+      </InfoRow>
+      <InfoRow>
+        <Label>Stock:</Label>
+        <Value>{item.stock}</Value>
+      </InfoRow>
 
-      <ItemName>{item.name}</ItemName>
-      <ItemDetails>Barcode: {item.barcode}</ItemDetails>
-      <ItemDetails>Category: {item.category}</ItemDetails>
-      <ItemDetails>
-        Purchase: ${item.purchasePrice} | Sell: ${item.sellPrice}
-      </ItemDetails>
-      <ItemDetails>
-        Stock: {item.existence} unit{item.existence === 1 ? "" : "s"}
-      </ItemDetails>
-      <ItemDetails>Description: {item.description}</ItemDetails>
+      <ButtonRow>
+        <EditButton onClick={() => onEdit(item)}>Edit</EditButton>
+      </ButtonRow>
     </Card>
   );
 }
