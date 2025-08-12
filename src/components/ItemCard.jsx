@@ -1,16 +1,29 @@
 // components/ItemCard.jsx
 import React, { useState } from "react";
 import styled from "styled-components";
+import { motion } from "framer-motion";
+import { useInventory } from "../store/InventoryContext";
 
-const Card = styled.div`
+const MotionCard = styled(motion.div)`
   border: 1px solid #ccc;
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
   background-color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  min-width: 300px;
+  min-width: 280px;
   max-width: 500px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 128, 0, 0.15);
+    transform: scale(1.01);
+  }
+
+  @media (max-width: 600px) {
+    padding: 12px;
+    font-size: 14px;
+  }
 `;
 
 const ItemName = styled.h3`
@@ -34,7 +47,7 @@ const EditButton = styled.button`
   font-size: 14px;
 
   &:hover {
-    background-color: #45a049;
+    background-color: #388e3c;
   }
 `;
 
@@ -68,11 +81,18 @@ const ButtonRow = styled.div`
   gap: 10px;
 `;
 
-export default function ItemCard({ item, onEdit }) {
+export default function ItemCard({ item }) {
   const [showEdit, setShowEdit] = useState(false);
 
+  const { setEditingItem } = useInventory();
+
   return (
-    <Card>
+    <MotionCard
+      layout
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+    >
       <InfoRow>
         <Label>Name:</Label>
         <Value>{item.name}</Value>
@@ -103,8 +123,8 @@ export default function ItemCard({ item, onEdit }) {
       </InfoRow>
 
       <ButtonRow>
-        <EditButton onClick={() => onEdit(item)}>Edit</EditButton>
+        <EditButton onClick={() => setEditingItem(item)}>Edit</EditButton>
       </ButtonRow>
-    </Card>
+    </MotionCard>
   );
 }

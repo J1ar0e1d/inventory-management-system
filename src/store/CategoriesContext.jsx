@@ -1,41 +1,28 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Create the context
-const InventoryContext = createContext();
+const CatetoryContext = createContext();
 
-export const InventoryProvider = ({ children }) => {
-  const [items, setItems] = useState([]);
+export const CatetoryProvider = ({ children }) => {
+  const [categories, setCategories] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
 
   // Load from localStorage or from base JSON
   useEffect(() => {
-    const stored = localStorage.getItem("inventory-items");
+    const stored = localStorage.getItem("inventory");
 
     if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setItems(parsed);
-        } else {
-          setItems([]);
-          console.error("Inventory is not an array.");
-        }
-      } catch (err) {
-        console.error("Failed to parse stored inventory:", err);
-        setItems([]);
-      }
+      setItems(JSON.parse(stored));
     } else {
-      // Optionally load default inventory
       fetch("/baseInventory.json")
         .then((res) => res.json())
         .then((data) => {
+          console.log(data);
           setItems(data);
+
           localStorage.setItem("inventory", JSON.stringify(data));
         })
-        .catch((err) => {
-          console.error("Failed to load base inventory:", err);
-          setItems([]);
-        });
+        .catch((err) => console.error("Failed to load base inventory:", err));
     }
   }, []);
 
@@ -61,17 +48,6 @@ export const InventoryProvider = ({ children }) => {
     });
   };
 
-  // Groups items in their respective categories
-
-  const grouped = items.reduce((acc, item) => {
-    const cat = item.category || "Uncategorized";
-    acc[cat] = acc[cat] ? [...acc[cat], item] : [item];
-    return acc;
-  }, {});
-
-  const categories = Object.keys(grouped);
-  console.log(categories);
-
   return (
     <InventoryContext.Provider
       value={{
@@ -82,7 +58,6 @@ export const InventoryProvider = ({ children }) => {
         editItem,
         editingItem,
         setEditingItem,
-        categories,
       }}
     >
       {children}
