@@ -6,6 +6,7 @@ const InventoryContext = createContext();
 export const InventoryProvider = ({ children }) => {
   const [items, setItems] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
+  const [activityLog, setActivityLog] = useState([]);
 
   // Load from localStorage or from base JSON
   useEffect(() => {
@@ -29,8 +30,10 @@ export const InventoryProvider = ({ children }) => {
       fetch("/baseInventory.json")
         .then((res) => res.json())
         .then((data) => {
-          setItems(data);
-          localStorage.setItem("inventory", JSON.stringify(data));
+          if (Array.isArray(data)) {
+            setItems(data);
+            localStorage.setItem("inventory-items", JSON.stringify(data));
+          }
         })
         .catch((err) => {
           console.error("Failed to load base inventory:", err);
@@ -39,38 +42,75 @@ export const InventoryProvider = ({ children }) => {
     }
   }, []);
 
+  const logActivity = (message) => {
+    const entry = {
+      id: Date.now(),
+      message,
+      timestamp: new Date().toLocaleString(),
+    };
+    setActivityLog((prev) => [entry, ...prev]); // newest first
+  };
+
   // 🔁 Always sync state updates with localStorage
   const updateInventory = (newItems) => {
     setItems(newItems);
-    localStorage.setItem("inventory", JSON.stringify(newItems));
+    localStorage.setItem("inventory-items", JSON.stringify(newItems));
   };
 
   const editItem = (updatedItem) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
-    );
-    localStorage.setItem("inventory", JSON.stringify(updatedItem));
+    setItems((prev) => {
+      const updated = prev.map((item) => {
+        if (item.id === updatedItem.id) {
+          // log the differences
+          const changes = [];
+          if (item.name !== updatedItem.name)
+            changes.push(`Name: "${item.name}" → "${updatedItem.name}"`);
+          if (item.quantity !== updatedItem.quantity)
+            changes.push(
+              `Quantity: ${item.quantity} → ${updatedItem.quantity}`
+            );
+          if (item.price !== updatedItem.price)
+            changes.push(`Price: ${item.price} → ${updatedItem.price}`);
+          if (item.description !== updatedItem.description)
+            changes.push(
+              `Description: "${item.description}" → "${updatedItem.description}"`
+            );
+
+          if (changes.length > 0) {
+            logActivity(`Item "${item.name}" updated: ${changes.join(", ")}`);
+          }
+          return updatedItem;
+        }
+        return item;
+      });
+
+      localStorage.setItem("inventory-items", JSON.stringify(updated));
+      return updated;
+    });
+    setEditingItem(null);
   };
 
   // Adds items to the corresponding category
   const addItem = (newItem) => {
     setItems((prev) => {
       const updated = [...prev, { ...newItem, id: Date.now() }];
-      localStorage.setItem("items", JSON.stringify(updated));
+      localStorage.setItem("inventory-items", JSON.stringify(updated));
       return updated;
     });
+    logActivity(`Item "${newItem.name}" added (Qty: ${newItem.quantity})`);
   };
 
   // Groups items in their respective categories
 
-  const grouped = items.reduce((acc, item) => {
-    const cat = item.category || "Uncategorized";
-    acc[cat] = acc[cat] ? [...acc[cat], item] : [item];
-    return acc;
-  }, {});
+  const grouped = Array.isArray(items)
+    ? items.reduce((acc, item) => {
+        const cat = item.category || "Uncategorized";
+        acc[cat] = acc[cat] ? [...acc[cat], item] : [item];
+        return acc;
+      }, {})
+    : {};
 
   const categories = Object.keys(grouped);
-  console.log(categories);
 
   return (
     <InventoryContext.Provider
@@ -83,6 +123,8 @@ export const InventoryProvider = ({ children }) => {
         editingItem,
         setEditingItem,
         categories,
+        activityLog,
+        logActivity,
       }}
     >
       {children}

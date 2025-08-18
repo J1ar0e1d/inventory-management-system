@@ -1,5 +1,4 @@
-// components/EditItemModal.jsx
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import { useInventory } from "../store/InventoryContext";
@@ -9,190 +8,121 @@ const Overlay = styled.div`
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 50;
+  align-items: center;
 `;
 
 const Modal = styled(motion.div)`
-  background: #e6f7ea;
+  background: #e8f8f5;
   padding: 2rem;
-  width: 700px;
+  border-radius: 1rem;
+  width: 400px;
   max-width: 95%;
-  border-radius: 16px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  h2 {
-    margin-bottom: 1rem;
-    color: #206030;
-  }
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 `;
 
-const Form = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+const Title = styled.h2`
+  margin-bottom: 1rem;
+  color: #2e7d32;
+`;
 
-  label {
-    display: flex;
-    flex-direction: column;
-    font-weight: 600;
-    color: #2a4d3f;
-
-    input,
-    select {
-      margin-top: 0.4rem;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-  }
-
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
-  }
+const Input = styled.input`
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border-radius: 0.5rem;
+  border: 1px solid #aaa;
 `;
 
 const ButtonRow = styled.div`
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+`;
 
-  .cancel {
-    background: #ccc;
-    color: #333;
-  }
+const Button = styled.button`
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  ${(props) =>
+    props.$cancel
+      ? "background: #ccc; color: #333;"
+      : "background: #2e7d32; color: white;"}
 
-  .edit {
-    background: #27ae60;
-    color: white;
-  }
-
-  button {
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-
-    &:hover {
-      opacity: 0.85;
-    }
+  &:hover {
+    opacity: 0.9;
   }
 `;
 
-export default function EditItemModal({ item, onClose }) {
-  const { updateInventory } = useInventory();
-  const [formData, setFormData] = useState(item);
+export default function EditItemModal() {
+  const { editingItem, editItem, setEditingItem, updateInventory } =
+    useInventory();
+  const [form, setForm] = useState(editingItem || {});
 
   useEffect(() => {
-    setFormData(item); // preload data on item prop change
-  }, [item]);
+    if (editingItem) setForm(editingItem);
+  }, [editingItem]);
 
-  // const updatedItems = items.map((item) =>
-  //   item.id === editeditem.id ? editedItem : item
-  // );
-
-  // updateInventory(updatedItems);
+  if (!editingItem) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEdit = () => {
-    updateInventory(formData); // logic in context
-    onClose(); // close modal after update
+  const handleSave = () => {
+    editItem({
+      ...form,
+      quantity: Number(form.quantity),
+      price: Number(form.price),
+      description: String(form.description),
+    });
   };
 
   return (
-    <Overlay>
+    <Overlay onClick={() => setEditingItem(null)}>
       <Modal
-        initial={{ opacity: 0, y: "-20%" }}
-        animate={{ opacity: 1, y: "0%" }}
-        exit={{ opacity: 0, y: "-20%" }}
-        transition={{ duration: 0.3 }}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.8, opacity: 0 }}
       >
-        <h2>Edit Item</h2>
-        <Form>
-          <label>
-            Name:
-            <input name="name" value={formData.name} onChange={handleChange} />
-          </label>
-          <label>
-            Description:
-            <input
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            Barcode:
-            <input
-              name="barcode"
-              value={formData.barcode}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            Purchase Price:
-            <input
-              type="number"
-              name="purchasePrice"
-              value={formData.purchasePrice}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            Sell Price:
-            <input
-              type="number"
-              name="sellPrice"
-              value={formData.sellPrice}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            Category:
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-            >
-              <option value="Tools">Tools</option>
-              <option value="Paint">Paint</option>
-              <option value="Electrical">Electrical</option>
-              <option value="Plumbing">Plumbing</option>
-              <option value="Hardware">Hardware</option>
-            </select>
-          </label>
-          <label>
-            Existence:
-            <input
-              type="number"
-              name="existence"
-              value={formData.existence}
-              onChange={handleChange}
-            />
-          </label>
-        </Form>
-
+        <Title>Edit Item</Title>
+        <Input
+          name="name"
+          value={form.name || ""}
+          onChange={handleChange}
+          placeholder="Item Name"
+        />
+        <Input
+          name="quantity"
+          type="number"
+          value={form.quantity || ""}
+          onChange={handleChange}
+          placeholder="Quantity"
+        />
+        <Input
+          name="price"
+          type="number"
+          value={form.price || ""}
+          onChange={handleChange}
+          placeholder="Price"
+        />
+        <Input
+          name="description"
+          type="string"
+          value={form.description || ""}
+          onChange={handleChange}
+          placeholder="Description"
+        />
         <ButtonRow>
-          <button onClick={onClose} className="cancel">
+          <Button $cancel onClick={() => setEditingItem(null)}>
             Cancel
-          </button>
-          <button onClick={handleEdit} className="edit">
-            Edit
-          </button>
+          </Button>
+          <Button onClick={handleSave}>Save</Button>
         </ButtonRow>
       </Modal>
     </Overlay>

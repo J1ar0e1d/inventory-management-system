@@ -38,7 +38,9 @@ const BackLink = styled(Link)`
 `;
 
 const ItemsGrid = styled.div`
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 `;
@@ -50,13 +52,14 @@ export default function CategoryPage() {
   const categoryKey = categoryName?.toLowerCase() || "";
   const theme = categoriesTheme[categoryKey] ?? categoriesTheme.default;
 
-  const filteredItems = items.filter(
-    (item) =>
-      item.category &&
-      item.category.toLowerCase() === categoryName.toLowerCase()
-  );
-
-  // const IconComponent = theme.icon;
+  const filteredItems = Array.isArray(items)
+    ? items.filter(
+        (item) =>
+          item.category &&
+          item.category.toLowerCase() === categoryName.toLowerCase()
+      )
+    : [];
+  console.log(filteredItems);
 
   return (
     <Container bg={theme.bg} color={theme.color}>
@@ -72,7 +75,7 @@ export default function CategoryPage() {
       {filteredItems.length > 0 ? (
         <ItemsGrid>
           {filteredItems.map((item) => (
-            <ItemCard key={item.id} item={item} />
+            <ItemCard key={item.id} item={item} onEdit={item} />
           ))}
         </ItemsGrid>
       ) : (

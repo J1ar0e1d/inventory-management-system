@@ -5,36 +5,31 @@ import { motion } from "framer-motion";
 import { useInventory } from "../store/InventoryContext";
 
 const MotionCard = styled(motion.div)`
-  border: 1px solid #ccc;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  min-width: 280px;
-  max-width: 500px;
-  transition: box-shadow 0.2s ease;
+  flex: 1 1 calc(250px - 1rem);
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 128, 0, 0.15);
-    transform: scale(1.01);
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
   }
 
   @media (max-width: 600px) {
-    padding: 12px;
-    font-size: 14px;
+    flex: 1 1 100%;
   }
 `;
 
-const ItemName = styled.h3`
-  margin: 0;
-  color: #000;
-`;
-
-const ItemDetails = styled.p`
-  margin: 4px 0;
-  font-size: 0.9rem;
+const Label = styled.span`
+  font-weight: bold;
   color: #555;
+  margin-right: 0.25rem;
 `;
 
 const EditButton = styled.button`
@@ -62,11 +57,6 @@ const InfoRow = styled.div`
   }
 `;
 
-const Label = styled.div`
-  font-weight: 600;
-  color: #444;
-`;
-
 const Value = styled.div`
   color: #222;
   max-width: 60%;
@@ -76,8 +66,9 @@ const Value = styled.div`
 
 const ButtonRow = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-top: 12px;
+  font-size: 0.95rem;
   gap: 10px;
 `;
 
@@ -88,10 +79,12 @@ export default function ItemCard({ item }) {
 
   return (
     <MotionCard
-      layout
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
+      exit={{ opacity: 0, y: -15 }}
+      layout
+      whileTap={{ scale: 0.97 }}
+      // onClick={() => onEdit?.(item)}
     >
       <InfoRow>
         <Label>Name:</Label>
@@ -119,7 +112,7 @@ export default function ItemCard({ item }) {
       </InfoRow>
       <InfoRow>
         <Label>Stock:</Label>
-        <Value>{item.stock}</Value>
+        <Value>{item.existence}</Value>
       </InfoRow>
 
       <ButtonRow>
